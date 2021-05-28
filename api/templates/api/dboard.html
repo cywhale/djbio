@@ -1,0 +1,16 @@
+{% extends 'api/base.html' %}
+{% block content %}
+  {% if request.user.is_authenticated %}
+    <div>
+      <h2>Hello, {{ request.user.username }} from Djbio...</h2>
+      <br>
+      <span>Now we have {{ records }} data in json</span>
+    </div>
+  {% else %}
+    <div>
+      <h2>Sorry, Please Login first... </h2><br>
+      <a href="{% url api:login%}">Login</a>
+    </div>
+  {% endif %}
+{% endblock content %}
+
