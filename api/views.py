@@ -7,6 +7,9 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.urls import reverse
 from django.contrib import messages
 from .models import apitest
+import logging #Logger
+
+logger = logging.getLogger(__file__)
 
 # Create your views here.
 
@@ -36,14 +39,17 @@ def log_in(request):
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
-            if not user:
-                messages.error(request,'username or password not correct')
-                return redirect('/login/')
-            else:
+            logger.info("User Login Trial: %s", user)
+            if user is not None:
                 #if user.is_active:
+                logger.info("User Login ok: %s", user)
                 login(request, user)
                 #return HttpResponseRedirect(reverse('api:dboard', username)) #find name is 'dboard' under api app
                 return redirect(reverse('api:user_handler'))
+            else:
+                logger.info("No User found: %s", user)
+                messages.error(request,'username or password not correct')
+                return redirect('/login/')
         else:
             messages.error(request, form.errors)
             return redirect('/login/')
@@ -61,6 +67,7 @@ def sign_up(request):
         form = UserCreationForm(data=request.POST)
         if form.is_valid():
             form.save()
+            logger.info("Should redirect after sign_up!")
             return redirect('/login/')
         else:
             messages.error(request, form.errors)

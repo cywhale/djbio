@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 
 #import os
 import re #regular expression module
+import logging #Logger
 import environ
 from pathlib import Path
 from django.contrib.messages import constants as messages
@@ -160,3 +161,47 @@ CHANNEL_LAYERS = {
         'ROUTING': 'djbio.routing.channel_routing',
     }
 }
+
+# modified by cywhale for logging #https://mattsegal.dev/file-logging-django.html
+LOGGING = {
+    'version': 1,
+    "disable_existing_loggers": False,
+    "root": {"level": "INFO", "handlers": ["file"]},
+    'formatters': {
+        #'verbose': {
+        #    'format': '%(levelname)s %(asctime)s %(module)s %(process)d %(thread)d %(message)s'
+        #},
+        "app": {
+            "format": (
+                u"%(asctime)s [%(levelname)-8s] "
+                "(%(module)s.%(funcName)s) %(message)s"
+            ),
+            "datefmt": "%Y-%m-%d %H:%M:%S",
+        },
+        'simple': {
+            'format': '%(asctime)s %(levelname)s %(message)s'
+        },
+    },
+    'handlers': {
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple'
+        },
+        'file': {
+            'level': 'INFO',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/django_log_file.log',
+            'formatter': 'app'
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+    }
+}
+
+
