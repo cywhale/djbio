@@ -14,6 +14,11 @@ https://docs.djangoproject.com/en/3.2/ref/settings/
 import re #regular expression module
 import environ
 from pathlib import Path
+from django.contrib.messages import constants as messages
+
+MESSAGE_TAGS = {
+    messages.ERROR: 'danger'
+}
 
 env = environ.Env()
 environ.Env.read_env()

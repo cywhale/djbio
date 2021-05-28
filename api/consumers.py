@@ -7,7 +7,9 @@ from channels.auth import channel_session_user, channel_session_user_from_http
 #channel_layer = get_channel_layer()
 
 @channel_session_user_from_http
-def ws_connect(self):
+def ws_connect(message):
+    #if user.is_authenticated:
+    #    Group("user-{}".format(user.id)).add(message.reply_channel)
     Group('users').add(message.reply_channel)
     Group('users').send({
         'text': json.dumps({

@@ -1,10 +1,10 @@
 {% extends 'api/base.html' %}
 {% block content %}
-  //{% if form.errors %}
-  //  <p>Your username and password didn't match. Please try again.</p>
-  //{% endif %}
+  {# if form.errors #}
+    <!--p>Your username and password didn't match. Please try again.</p-->
+  {# endif #}
 
-  <form action="{% url 'api:login' %}" method="post">
+  <form action="{% url 'api:log_in' %}" method="post">
     {% csrf_token %}
     {% for field in form %}
       <div>
@@ -14,5 +14,5 @@
     {% endfor %}
     <button type="submit">Log in</button>
   </form>
-  <p>Don't have an account? <a href="{% url 'api:signup' %}">Sign up!</a></p>
+  <p>Don't have an account? <a href="{% url 'api:sign_up' %}">Sign up!</a></p>
 {% endblock content %}
