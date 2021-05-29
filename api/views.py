@@ -1,6 +1,6 @@
 # ref: https://realpython.com/getting-started-with-django-channels/ 202105
 from django.shortcuts import render, redirect
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse #, HttpResponseRedirect
 from django.contrib.auth import login, logout, get_user_model, authenticate
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
@@ -27,39 +27,35 @@ def user_handler(request):
     users = User.objects.select_related('apiuser')
     for user in users:
         user.status = 'Online' if hasattr(user, 'apiuser') else 'Offline'
-    return render(request, 'api/user.html', {'users': users})
+    return render(request, 'user/user.html', {'users': users})
 
 def log_in(request):
     form = AuthenticationForm()
     if request.method == 'POST':
         form = AuthenticationForm(data=request.POST)
         if form.is_valid():
-            #username = form.get_user() # not really authenticate
-            #login(request, username)
+            #logger.info("User Login Trial: %s", form.get_user()) #logger works here
             username = request.POST['username']
             password = request.POST['password']
             user = authenticate(username=username, password=password)
-            logger.info("User Login Trial: %s", user)
             if user is not None:
                 #if user.is_active:
-                logger.info("User Login ok: %s", user)
                 login(request, user)
                 #return HttpResponseRedirect(reverse('api:dboard', username)) #find name is 'dboard' under api app
                 return redirect(reverse('api:user_handler'))
             else:
-                logger.info("No User found: %s", user)
-                messages.error(request,'username or password not correct')
-                return redirect('/login/')
+                logger.info("No User found!!") #If error occurs and usage of logger seems not work (in form.is_valid, loggers works well)
+                #messages.info(request,'username or password not correct') #Django give its own error message in base.html messages template
+                #return redirect('login') #stay here
         else:
-            messages.error(request, form.errors)
-            return redirect('/login/')
+            messages.error(request, form.errors) #Seems no effect??
 
-    return render(request, 'api/login.html', {'form': form})
+    return render(request, 'user/login.html', {'form': form})
 
-@login_required(login_url='/login/')
+@login_required(login_url='/login')
 def log_out(request):
     logout(request)
-    return redirect('/login/')
+    return redirect('/login')
 
 def sign_up(request):
     form = UserCreationForm()
@@ -67,10 +63,9 @@ def sign_up(request):
         form = UserCreationForm(data=request.POST)
         if form.is_valid():
             form.save()
-            logger.info("Should redirect after sign_up!")
-            return redirect('/login/')
+            return redirect('/login')
         else:
-            messages.error(request, form.errors)
-            return redirect(reverse('api:sign_up'))
+            messages.error(request, form.errors) #Seems no effect??
+            #return redirect(reverse('api:sign_up')) #stay here
 
-    return render(request, 'api/signup.html', {'form': form})
+    return render(request, 'user/signup.html', {'form': form})

@@ -1,4 +1,4 @@
-{% extends 'api/base.html' %}
+{% extends 'base.html' %}
 {% block content %}
   <a href="{% url 'api:log_out' %}">Log out</a>
   <br>
@@ -43,7 +43,5 @@
         user.html(username + ': Offline');
       }
     };
-
-
   </script>
 {% endblock script %}
