@@ -70,7 +70,7 @@ ROOT_URLCONF = 'djbio.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [], #[os.path.join(BASE_DIR, 'api/templates')],
         'APP_DIRS': True, #so that django will look into each app's template to find html for this app
         'OPTIONS': {
             'context_processors': [
