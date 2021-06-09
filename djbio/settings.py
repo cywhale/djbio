@@ -10,7 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.2/ref/settings/
 """
 
-#import os
+import os
 import re #regular expression module
 import logging #Logger
 import environ
@@ -37,10 +37,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY=env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True # os.environ.get("DEBUG", False)
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -70,7 +69,7 @@ ROOT_URLCONF = 'djbio.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [], #[os.path.join(BASE_DIR, 'api/templates')],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')], #[], #or use 'api/templates'
         'APP_DIRS': True, #so that django will look into each app's template to find html for this app
         'OPTIONS': {
             'context_processors': [
@@ -79,6 +78,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
+            'debug': DEBUG,
         },
     },
 ]
@@ -140,8 +140,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-# STATIC_ROOT = os.path.join(BASE_DIR,'static')
+STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles') #for {% load staticfiles %}
 STATIC_URL = '/static/'
+STATICFILES_DIRS = (
+    os.path.join(BASE_DIR, "static"),
+   #'/var/www/static/', # if have multiple
+)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/3.2/ref/settings/#default-auto-field

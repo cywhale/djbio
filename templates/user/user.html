@@ -1,0 +1,48 @@
+{% extends 'base.html' %}
+{% block content %}
+  {% load staticfiles %}
+  <a href="{% url 'api:log_out' %}">Log out</a>
+  <br>
+  <div>
+    <ul>
+      {# for user in users #}
+        <!-- NOTE: We escape HTML to prevent XSS attacks. -->
+        <li data-username="{{ user.username|escape }}">
+          {{ user.username|escape }}: {{ user.status|default:'Offline' }}
+        </li>
+        <li>
+          <a href="{% url 'api:dboard' %}">See API..</a>
+        </li>
+      {# endfor #}
+    </ul>
+  </div>
+  <form id="msgform">
+    <table id="msgbox">
+      <tbody>
+        {% for message in messages %}
+          <tr>
+            <!--td>{{ message.formatted_timestamp }}</td-->
+            <td>{{ message.message }}</td>
+          </tr> 
+        {% endfor %}
+      </tbody>
+      <tfoot>
+      <tr>
+        <td>Say something:</td>
+        <td colspan=2>
+          <input id="message" type="text" placeholder="message">
+          <button type="submit" id="msgsend">Say it</button>
+        </td>
+      </tfoot>
+    </table>
+  </form>
+
+{% endblock content %}
+
+
+{% block script %}
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" crossorigin="anonymous"></script>
+  <script type="text/javascript" src="{% static 'message.js' %}"></script>
+{% endblock script %}

@@ -4,10 +4,11 @@ from channels.routing import route
 #from channels.routing import ProtocolTypeRouter, URLRouter
 #from channels.auth import AuthMiddlewareStack
 
-from api.consumers import ws_connect, ws_disconnect
+from api.consumers import * #ws_connect, ws_disconnect
 
 channel_routing = [
     route('websocket.connect', ws_connect),
+    route('websocket.receive', ws_receive),
     route('websocket.disconnect', ws_disconnect),
 ]
 #application = ProtocolTypeRouter({
