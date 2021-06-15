@@ -27,7 +27,12 @@ env = environ.Env()
 environ.Env.read_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+# BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# channels 3.0
+#### Channels-specific settings
+redis_host = os.environ.get('REDIS_HOST', 'localhost')
 
 
 # Quick-start development settings - unsuitable for production
@@ -44,6 +49,10 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    'admin_tools',
+    #'admin_tools.theming',
+    #'admin_tools.menu',
+    #'admin_tools.dashboard',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -70,7 +79,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [os.path.join(BASE_DIR, 'templates')], #[], #or use 'api/templates'
-        'APP_DIRS': True, #so that django will look into each app's template to find html for this app
+        'APP_DIRS': False, #True, so that django will look into each app's template to find html for this app
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
@@ -79,12 +88,19 @@ TEMPLATES = [
                 'django.contrib.messages.context_processors.messages',
             ],
             'debug': DEBUG,
+            'loaders': [
+                'admin_tools.template_loaders.Loader',
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                ]),
+            ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'djbio.wsgi.application'
-#ASGI_APPLICATION = 'djbio.routing.application' #Channels 3.0
+ASGI_APPLICATION = 'djbio.routing.application' #Channels 3.0
 
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
@@ -127,20 +143,16 @@ AUTH_PASSWORD_VALIDATORS = [
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
 LANGUAGE_CODE = 'en-us'
-
 TIME_ZONE = 'UTC'
-
 USE_I18N = True
-
 USE_L10N = True
-
 USE_TZ = True
 
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.2/howto/static-files/
 
-STATIC_ROOT = os.path.join(BASE_DIR,'staticfiles') #for {% load staticfiles %}
+# STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles') #channels 1.1.8 #for {% load staticfiles %}
 STATIC_URL = '/static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
@@ -154,8 +166,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # https://github.com/django/channels_redis
 CHANNEL_LAYERS = {
     'default': {
-        'BACKEND': 'asgi_redis.RedisChannelLayer', #deprecated
-        #'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        #'BACKEND': 'asgi_redis.RedisChannelLayer', #channels 1.1.8
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
             'hosts': [('localhost', 6379)],
             'channel_capacity': {
@@ -164,7 +176,7 @@ CHANNEL_LAYERS = {
                 re.compile(r'^websocket.send\!.+'): 20,
             },
         },
-        'ROUTING': 'djbio.routing.channel_routing',
+        #'ROUTING': 'djbio.routing.channel_routing', #channels 1.1.8 #only needs under channels 2
     }
 }
 

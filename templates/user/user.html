@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-  {% load staticfiles %}
+  {# % load staticfiles % #}
+  {% load static %}
   <a href="{% url 'api:log_out' %}">Log out</a>
   <br>
   <div>

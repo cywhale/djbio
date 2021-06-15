@@ -16,3 +16,6 @@ admin.site.register(apitest) #admin.site, tmp try to customize it to use #admin_
 admin.site.register(apiuser)
 
 #admin_site.disable_action('delete_selected')
+
+class apiuserAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/change_form01.html'

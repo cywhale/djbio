@@ -11,10 +11,18 @@ $(function() {
       socket.onopen();
     }
 
+    socket.onclose = function () {
+      console.log("Disconnected from websocket");
+    }
+
     socket.onmessage = function message(event) {
       let data = JSON.parse(event.data);
+      console.log("Data received: ", data);
       // NOTE: We escape JavaScript to prevent XSS attacks.
-
+      if (data.error) {
+        alert(data.error);
+        return;
+      }
       let username = encodeURI(data['username']);
       let user = $('li').filter(function () {
         return $(this).data('username') == username;
@@ -23,10 +31,12 @@ $(function() {
       if (data['message']) {
         console.log(data['message']);
         let msg = $("#msgbox");
+        let adminmsg = $("#adminmsgbox");
         let ele = $("<tr></tr>");
 
-        ele.append($("<td></td>").text(data['message'].message));
+        ele.append($("<td></td>").text(data['message'])); //channels 1.1.8: use data['message'].message
         msg.append(ele);
+        adminmsg.append(ele);
       }
 
       if (data['is_logged_in']) {
@@ -45,4 +55,15 @@ $(function() {
         $("#message").val('').focus();
         return false;
     });
+
+    $("#adminmsgform").on("submit", function(event) {
+        let msg = {
+            message: $('#adminmessage').val(),
+        }
+        socket.send(JSON.stringify(msg));
+        $("#adminmessage").val('').focus();
+        return false;
+    });
 });
+
+
