@@ -6,11 +6,32 @@ import json
 
 # channels 3.0
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
-#from asgiref.sync import async_to_sync
+from asgiref.sync import sync_to_async
 from .exceptions import ClientError
+from .models import apiuser, Message #MsgForm
+from django.utils import timezone
 
 import logging
 logger = logging.getLogger(__file__)
+
+def create_message(username):
+    sender = apiuser.objects.get(user__username=username) #self.scope["user"].username
+    logger.info("Now get msg handler: %s", sender)
+    msgobj = Message(handle=sender, due=None)
+    msgobj.save()
+    #msg = json.loads(json.dumps({ #MsgForm({ #Message.objects.create(
+        #    #id=None,
+        #'handle':sender,
+        #    'message':data["message"],
+        #    'group':'all',
+        #    'level':'Normal',
+        #'due': None,
+        #    'timestamp': timezone.now
+        #}))
+    #msg.save()
+    #msgobj = sender.message.create(**msg)
+    logger.info('Message created: %s', msgobj)
+
 
 # channels 3.0 ref: https://github.com/andrewgodwin/channels-examples
 class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
@@ -31,7 +52,7 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         )
 
     async def receive_json(self, data):
-        logger.info('Message user=%s message=%s', self.scope["user"].username, data)
+        #logger.info('Message user=%s message=%s', self.scope["user"].username, data)
         try:
             await self.channel_layer.group_send(
                 "users",
@@ -40,6 +61,8 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
                     "message": data["message"]
                 }
             )
+            await sync_to_async(create_message)(self.scope["user"].username)
+
         except ClientError as err:
             await self.send_json({"error": err.code}) # Catch any errors and send it back
 
@@ -68,6 +91,7 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         await self.send_json({
             "message": event["message"],
         })
+
 
 # channels 1.1.8
 #@channel_session_user_from_http

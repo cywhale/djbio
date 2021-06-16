@@ -14,6 +14,7 @@ class tmptryAdminSite(admin.AdminSite):
 from .models import *
 admin.site.register(apitest) #admin.site, tmp try to customize it to use #admin_site
 admin.site.register(apiuser)
+admin.site.register(Message)
 
 #admin_site.disable_action('delete_selected')
 
