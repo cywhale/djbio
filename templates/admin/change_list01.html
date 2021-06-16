@@ -1,14 +1,14 @@
-{% extends "admin/change_form.html" %}
+{% extends "admin/change_list.html" %}
 {# % load staticfiles % #}
-{% load static %}
 {# % load i18n admin_static % #}
+{% load static %}
 
-{# % block object-tools-items % #}
-{# % block form_top % #}
-
-{% block admin_change_form_document_ready %}
+{% block content %}
 {{ block.super }}
-<script src="{% static 'message.js' %}"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" crossorigin="anonymous"></script>
+  <script src="{% static 'message.js' %}" defer></script>
+{{ media }}
 <div>
   <form id="adminmsgform">
     <table id="adminmsgbox">
@@ -26,7 +26,6 @@
         <td colspan=2>
           <input id="adminmessage" type="text" placeholder="message">
           <button type="submit" id="adminmsgsend">Say it</button>
-          <!--a href="{% url 'admin:adminsend_msg' %}" class="btn btn-high btn-success">Send</a-->
         </td>
       </tfoot>
     </table>

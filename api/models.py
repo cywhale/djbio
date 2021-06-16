@@ -3,7 +3,7 @@ from __future__ import unicode_literals
 from django.db import models
 from django.forms import ModelForm
 #from django.contrib.gis.db import models
-from django.contrib.auth.models import Group #, User
+from django.contrib.auth.models import Group, User
 #from django.db.models import JSONField
 # Django 2.2.23
 # from django.contrib.postgres.fields import JSONField
@@ -31,12 +31,17 @@ class apiuser(models.Model):
 
 class Message(models.Model):
     #id= models.AutoField(primary_key=True)
-    handle=models.ForeignKey(apiuser, #settings.AUTH_USER_MODEL,  #User
+    handle=models.ForeignKey(User, #apiuser --> use apiuser will be deleted if logout (api/signal.py)
         related_name='message',
-        to_field='user',
-        on_delete=models.CASCADE,
+        #to_field='user', #'user' --> if use apiuser
+        on_delete=models.CASCADE #caused delete if a user have been deleted
     )
     group= models.CharField(max_length=30, default="all")
+    #group= models.ForeignKey(Group,
+    #    to_field='name',
+    #    default='', null=True, blank=True,
+    #    on_delete=models.SET_NULL
+    #)
     message = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
     due = models.DateTimeField(default=timezone.now, db_index=False, null=True, blank=True)
@@ -46,7 +51,6 @@ class Message(models.Model):
         URGENT= 2, _('Urgent')
         ONTOP = 3, _('Ontop')
     level = models.IntegerField(choices=MsgLevel.choices, default=MsgLevel.NORMAL)
-    #level = models.PositiveSmallIntegerField(default=1)
 
     def __unicode__(self):
         return '[{timestamp}] {handle} to {group}: {message}'.format(**self.as_dict())

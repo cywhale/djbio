@@ -8,29 +8,29 @@ import json
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from asgiref.sync import sync_to_async
 from .exceptions import ClientError
-from .models import apiuser, Message #MsgForm
-from django.utils import timezone
+from django.contrib.auth.models import User #, Group
+from .models import Message #apiuser, MsgForm
+#from django.utils import timezone
 
 import logging
 logger = logging.getLogger(__file__)
 
 def create_message(username):
-    sender = apiuser.objects.get(user__username=username) #self.scope["user"].username
+    sender = User.objects.get(username=username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
     logger.info("Now get msg handler: %s", sender)
     msgobj = Message(handle=sender, due=None)
     msgobj.save()
     #msg = json.loads(json.dumps({ #MsgForm({ #Message.objects.create(
         #    #id=None,
-        #'handle':sender,
+        #    'handle':sender,
         #    'message':data["message"],
         #    'group':'all',
         #    'level':'Normal',
-        #'due': None,
+        #    'due': None,
         #    'timestamp': timezone.now
         #}))
-    #msg.save()
     #msgobj = sender.message.create(**msg)
-    logger.info('Message created: %s', msgobj)
+    #logger.info('Message created: %s', msgobj)
 
 
 # channels 3.0 ref: https://github.com/andrewgodwin/channels-examples

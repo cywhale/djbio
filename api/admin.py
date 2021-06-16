@@ -12,11 +12,14 @@ class tmptryAdminSite(admin.AdminSite):
 # Register your models here.
 
 from .models import *
-admin.site.register(apitest) #admin.site, tmp try to customize it to use #admin_site
-admin.site.register(apiuser)
-admin.site.register(Message)
+#admin.site.register(apitest) #admin.site, tmp try to customize it to use #admin_site
+@admin.register(apitest)
+@admin.register(apiuser)
+@admin.register(Message)
+
+class MessageAdmin(admin.ModelAdmin):
+    change_list_template = 'admin/change_list01.html'
 
 #admin_site.disable_action('delete_selected')
 
-class apiuserAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/change_form01.html'
+
