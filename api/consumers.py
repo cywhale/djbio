@@ -63,7 +63,7 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         )
 
     async def receive_json(self, data):
-        #logger.info('Message user=%s message=%s', self.scope["user"].username, data)
+        logger.info('Receive_json user=%s, message=%s, dtime=%s', self.scope["user"].username, data['message'], data['due'])
         try:
             await self.channel_layer.group_send(
                 "users",
