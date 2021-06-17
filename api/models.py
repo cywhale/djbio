@@ -1,7 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.forms import ModelForm
+#from django.forms import ModelForm
 #from django.contrib.gis.db import models
 from django.contrib.auth.models import Group, User
 #from django.db.models import JSONField
@@ -32,9 +32,9 @@ class apiuser(models.Model):
 class Message(models.Model):
     #id= models.AutoField(primary_key=True)
     handle=models.ForeignKey(User, #apiuser --> use apiuser will be deleted if logout (api/signal.py)
-        related_name='message',
+        related_name='message', null=True,
         #to_field='user', #'user' --> if use apiuser
-        on_delete=models.CASCADE #caused delete if a user have been deleted
+        on_delete=models.SET_NULL #CASCADE caused delete if a user have been deleted
     )
     group= models.CharField(max_length=30, default="all")
     #group= models.ForeignKey(Group,
@@ -44,7 +44,7 @@ class Message(models.Model):
     #)
     message = models.TextField()
     timestamp = models.DateTimeField(default=timezone.now, db_index=True)
-    due = models.DateTimeField(default=timezone.now, db_index=False, null=True, blank=True)
+    due = models.DateTimeField(default=None, db_index=False, null=True, blank=True)
 
     class MsgLevel(models.IntegerChoices): # >= Django 3
         NORMAL= 1, _('Normal')
@@ -73,7 +73,7 @@ class Message(models.Model):
             'due': self.due,
             'timestamp': self.formatted_timestamp}
 
-class MsgForm(ModelForm):
-    class Meta:
-        model = Message
-        fields = ['handle', 'message', 'group', 'level', 'due', 'timestamp']
+#class MsgForm(ModelForm):
+#    class Meta:
+#        model = Message
+#        fields = ['handle', 'message', 'group', 'level', 'due', 'timestamp']

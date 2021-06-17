@@ -46,7 +46,7 @@ $(function() {
         user.html(username + ': Offline');
       }
     };
-
+/* 20210616 modified: if only allow admin send message, comment it and user.html <!--tfoot> */
     $("#msgform").on("submit", function(event) {
         let msg = {
             message: $('#message').val(),
@@ -55,10 +55,12 @@ $(function() {
         $("#message").val('').focus();
         return false;
     });
-
+/* ---------------- admin control -------------------- */
     $("#adminmsgform").on("submit", function(event) {
+      //let due = document.getElementById("due_datetime").value;
         let msg = {
             message: $('#adminmessage').val(),
+            due: $('#due_datetime').val(),
         }
         socket.send(JSON.stringify(msg));
         $("#adminmessage").val('').focus();

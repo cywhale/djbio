@@ -3,10 +3,26 @@
 {# % load i18n admin_static % #}
 {% load static %}
 
+{% block extrahead %}
+  <script src="https://code.jquery.com/jquery-2.2.4.min.js" integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44=" crossorigin="anonymous"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+{% endblock %}
+
 {% block content %}
 {{ block.super }}
-  <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" crossorigin="anonymous"></script>
+  <script type="text/javascript">
+    $(document).ready(function(){
+      $("#due_datetime").datetimepicker({
+        format: "YYYY-MM-DD HH:mm",
+        defaultDate:'' //in django, needs YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format.
+      });
+    });
+  </script>
   <script src="{% static 'message.js' %}" defer></script>
 {{ media }}
 <div>
@@ -22,9 +38,15 @@
       </tbody>
       <tfoot>
       <tr>
-        <td>Say something:</td>
+        <td>Broadcast</td>
         <td colspan=2>
-          <input id="adminmessage" type="text" placeholder="message">
+          <textarea id="adminmessage" rows="3" placeholder="Say something here..."></textarea>
+        </td>
+        <td colspan=3>
+          <label for="due_datetime">due on:</label>
+          <input class="form-control" id="due_datetime" type="text" />
+        </td>
+        <td>
           <button type="submit" id="adminmsgsend">Say it</button>
         </td>
       </tfoot>
@@ -32,3 +54,4 @@
   </form>
 </div>
 {% endblock %}
+

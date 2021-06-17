@@ -2,7 +2,8 @@
 #from channels import Group # channels 1.1.8
 #from channels.auth import channel_session_user, channel_session_user_from_http
 #from django.contrib.auth.models import User
-import json
+#import json
+from datetime import datetime
 
 # channels 3.0
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -15,10 +16,20 @@ from .models import Message #apiuser, MsgForm
 import logging
 logger = logging.getLogger(__file__)
 
-def create_message(username):
+def is_valid_datetime(dtime):
+    try:
+        dtime = datetime.fromisoformat(dtime)
+        #logger.info("Get a date: %s", dtime)
+        return True
+
+    except ValueError:
+        return False
+
+def create_message(username, data):
+    dueon = data["due"] if is_valid_datetime(data["due"]) else None
     sender = User.objects.get(username=username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
-    logger.info("Now get msg handler: %s", sender)
-    msgobj = Message(handle=sender, due=None)
+    logger.info("Now get msg handler: %s, msg: %s, due_on: %s", sender, data['message'], dueon)
+    msgobj = Message(handle=sender, message=data['message'], due=dueon)
     msgobj.save()
     #msg = json.loads(json.dumps({ #MsgForm({ #Message.objects.create(
         #    #id=None,
@@ -58,10 +69,11 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
                 "users",
                 {
                     "type": "msg.send", #--> handler: msg_send
-                    "message": data["message"]
+                    "message": data["message"],
+                    "due": data["due"]
                 }
             )
-            await sync_to_async(create_message)(self.scope["user"].username)
+            await sync_to_async(create_message)(self.scope["user"].username, data)
 
         except ClientError as err:
             await self.send_json({"error": err.code}) # Catch any errors and send it back
