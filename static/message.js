@@ -58,9 +58,19 @@ $(function() {
 /* ---------------- admin control -------------------- */
     $("#adminmsgform").on("submit", function(event) {
       //let due = document.getElementById("due_datetime").value;
+        let localTime = '';
+        let tzone = Intl.DateTimeFormat().resolvedOptions().timeZone; //moment.tz.guess(); //not work
+        if ($('#due_datetime').val()) {
+          let duett = new Date($('#due_datetime').val());
+          let tzoffset = (new Date()).getTimezoneOffset() * 60000; //offset in milliseconds
+          localTime = (new Date(duett - tzoffset)).toISOString().slice(0, -1);
+          //console.log("calandar vs localtime: ", duett, localTime, tzone);
+        }
+
         let msg = {
             message: $('#adminmessage').val(),
-            due: $('#due_datetime').val(),
+            due: localTime,
+            tzone: tzone
         }
         socket.send(JSON.stringify(msg));
         $("#adminmessage").val('').focus();

@@ -3,7 +3,7 @@
 #from channels.auth import channel_session_user, channel_session_user_from_http
 #from django.contrib.auth.models import User
 #import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 # channels 3.0
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -11,22 +11,27 @@ from asgiref.sync import sync_to_async
 from .exceptions import ClientError
 from django.contrib.auth.models import User #, Group
 from .models import Message #apiuser, MsgForm
-#from django.utils import timezone
 
 import logging
 logger = logging.getLogger(__file__)
 
-def is_valid_datetime(dtime):
+#from django.conf import settings
+import pytz #handle localtime from js isostring
+
+def is_valid_datetime(dtime, tzone): #=settings.TIME_ZONE):
     try:
-        dtime = datetime.fromisoformat(dtime)
-        #logger.info("Get a date: %s", dtime)
+        #dtime = datetime.fromisoformat(dtime)
+        tz = pytz.timezone(tzone) if tzone and not tzone.isspace() else datetime.now().astimezone().tzinfo
+        dtime = datetime.fromisoformat(dtime).replace(tzinfo=tz)
+        logger.info("Get a date format: %s in timezone %s", dtime, tz)
         return True
 
     except ValueError:
+        logger.info("Get a Wrong date format: %s in timezone %s", dtime, tzone)
         return False
 
 def create_message(username, data):
-    dueon = data["due"] if is_valid_datetime(data["due"]) else None
+    dueon = data["due"] if is_valid_datetime(data["due"], data["tzone"]) else None
     sender = User.objects.get(username=username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
     logger.info("Now get msg handler: %s, msg: %s, due_on: %s", sender, data['message'], dueon)
     msgobj = Message(handle=sender, message=data['message'], due=dueon)
@@ -63,14 +68,15 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         )
 
     async def receive_json(self, data):
-        logger.info('Receive_json user=%s, message=%s, dtime=%s', self.scope["user"].username, data['message'], data['due'])
+        logger.info('Receive_json user=%s, message=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['due'], data['tzone'])
         try:
             await self.channel_layer.group_send(
                 "users",
                 {
                     "type": "msg.send", #--> handler: msg_send
                     "message": data["message"],
-                    "due": data["due"]
+                    "due": data["due"],
+                    "tzone": data["tzone"],
                 }
             )
             await sync_to_async(create_message)(self.scope["user"].username, data)
