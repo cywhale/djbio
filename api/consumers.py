@@ -3,7 +3,7 @@
 #from channels.auth import channel_session_user, channel_session_user_from_http
 #from django.contrib.auth.models import User
 #import json
-from datetime import datetime, timezone
+from datetime import datetime #, timezone
 
 # channels 3.0
 from channels.generic.websocket import AsyncJsonWebsocketConsumer

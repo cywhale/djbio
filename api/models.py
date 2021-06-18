@@ -16,8 +16,7 @@ import json
 import logging
 logger = logging.getLogger(__file__)
 
-
-def as_dict(qrylist):
+def msg_as_dict(qrylist):
     out = []
     for qry in qrylist:
        #out.append(model_to_dict(qry,fields=fields,exclude=exclude))
@@ -26,13 +25,12 @@ def as_dict(qrylist):
         dueon = getattr(qry, "due")
         msg = getattr(qry, "message")
         notion="" if level==1 else "IMPORTANT! "
-        due_on="" if dueon==None else " Note: Due on "+ dueon.strftime('%b %-d %-I:%M %p')
+        due_on="" if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
         out.append({'message': notion+msg+due_on})
 
     return out
 
-
-# Create your models here.
+# Create your models here. #Note that timezone.localtime(timestamp/due), otherwise cause an UTC timezone offset (-8)
 
 class apitest (models.Model):
     """A trial of test API."""
@@ -47,7 +45,15 @@ class apiuser(models.Model):
         settings.AUTH_USER_MODEL, related_name='apiuser',
         on_delete=models.CASCADE)
 #   group = models.ForeignKey(Group, on_delete=models.CASCADE)
-    last_checked = models.DateTimeField(default=timezone.now, db_index=True)
+    last_checked = models.DateTimeField(db_index=False, null=True, blank=True) #auto_now=True cannot be updated
+
+    @property
+    def formatted_lastchecked(self):
+        tlabel = timezone.localtime(self.last_checked).strftime('%Y-%m-%d %H:%M') if self.last_checked is not None else "(first login)" #('%b %-d %-I:%M %p')
+        return tlabel
+
+    def __str__(self):
+        return "%s last checked: %s" % (self.user.username, self.formatted_lastchecked)
 
 class Message(models.Model):
     #id= models.AutoField(primary_key=True)
@@ -63,29 +69,43 @@ class Message(models.Model):
     #    on_delete=models.SET_NULL
     #)
     message = models.TextField()
-    timestamp = models.DateTimeField(default=timezone.now, db_index=True)
+    timestamp = models.DateTimeField(auto_now=True, db_index=True)
     due = models.DateTimeField(default=None, db_index=False, null=True, blank=True)
 
     class MsgLevel(models.IntegerChoices): # >= Django 3
         NORMAL= 1, _('Normal')
         URGENT= 2, _('Urgent')
         ONTOP = 3, _('Ontop')
+
     level = models.IntegerField(choices=MsgLevel.choices, default=MsgLevel.NORMAL)
 
     @staticmethod
     def must_seen(last_checked=timezone.now):
         #q_check = Q(timestamp__gt=last_checked) # timestamp greater than user last_checked
-        logger.info('Got a dtime criteria: %s', last_checked)
+        chktime = last_checked if last_checked is not None else datetime.strptime('1970-01-01 00:00', "%Y-%m-%d %H:%M")
+        logger.info('Got a dtime criteria: %s', chktime)
         qry = Message.objects.filter(
             Q(handle__username='djbioer') &
-            (Q(timestamp__gt=last_checked) | (Q(due__isnull=False) & Q(due__gt=timezone.now()) & Q(level__gt=1))) #__date__gt
+            (Q(timestamp__gt=chktime) | (Q(due__isnull=False) & Q(due__gt=timezone.now()) & Q(level__gt=1))) #__date__gt
             ).order_by('timestamp').order_by('-level')
         logger.info('Must Seen: %s', qry)
-        qjson = {} if not qry.exists() else as_dict(qry)
+        qjson = {} if not qry.exists() else msg_as_dict(qry)
         return qjson
 
-    #def __unicode__(self):
-    #    return '[{timestamp}] {handle} to {group}: {message}'.format(**self.as_dict())
+    #def __unicode__(self): #seems not work in python3
+    def __str__(self):
+        return '[{timestamp}]{level} {group} {message} {due}'.format(**self.as_dict())
+
+    @property
+    def formatted_timestamp(self):
+        return timezone.localtime(self.timestamp).strftime('%Y-%m-%d %H:%M')
+
+    def as_dict(self):
+        return {'message': self.message,
+            'level': '' if self.level==1 else '['+self.get_level_display()+']', # display self.level name
+            'group': '' if self.group=='all' else ' to'+self.group+': ',
+            'due': "" if self.due==None else " Due on "+ timezone.localtime(self.due).strftime('%Y-%m-%d %H:%M'),
+            'timestamp': self.formatted_timestamp}
 
     #def save(self, *args, **kwargs):
         #if self.pk is None:  # if this is new object (not update)
@@ -93,17 +113,6 @@ class Message(models.Model):
             #self.msguid = str(uuid.uuid4())
     #   instance = super(Message, self).save(*args, **kwargs)
     #   return instance
-
-    #@property
-    #def formatted_due(self):
-    #    return self.due.strftime('%b %-d %-I:%M %p')
-
-    #def as_dict(self):
-    #    return {'message': self.message
-    #        'group': self.group,
-    #        'level': self.level.value,
-    #        'due': self.due,
-    #        'timestamp': self.formatted_timestamp}
 
 #class MsgForm(ModelForm):
 #    class Meta:
