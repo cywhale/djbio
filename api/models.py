@@ -11,6 +11,7 @@ from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Q
+from datetime import datetime
 import json
 
 import logging
@@ -45,6 +46,7 @@ class apiuser(models.Model):
         settings.AUTH_USER_MODEL, related_name='apiuser',
         on_delete=models.CASCADE)
 #   group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    channel_name = models.CharField(max_length=100, default="") #for build single channel (to single user)
     last_checked = models.DateTimeField(db_index=False, null=True, blank=True) #auto_now=True cannot be updated
 
     @property
@@ -118,3 +120,5 @@ class Message(models.Model):
 #    class Meta:
 #        model = Message
 #        fields = ['handle', 'message', 'group', 'level', 'due', 'timestamp']
+
+

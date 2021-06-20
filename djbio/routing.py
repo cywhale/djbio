@@ -5,7 +5,7 @@ from channels.http import AsgiHandler
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 ##
-from api.consumers import MsgConsumer #--> channels 1.1.8 #*
+from api.consumers import MsgConsumer #, LastMsgConsumer #--> channels 1.1.8 #*
 
 ## channels 1.1.8
 #channel_routing = [
@@ -20,6 +20,7 @@ application = ProtocolTypeRouter({
     "websocket": AuthMiddlewareStack(
         URLRouter([
             path('users/', MsgConsumer.as_asgi()),
+            #path('users/<str:user>/', LastMsgConsumer.as_asgi()),
         ]),
     ),
 })

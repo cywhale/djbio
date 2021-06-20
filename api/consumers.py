@@ -10,7 +10,7 @@ from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from asgiref.sync import sync_to_async
 from .exceptions import ClientError
 from django.contrib.auth.models import User #, Group
-from .models import Message #apiuser, MsgForm
+from .models import Message, apiuser #, MsgForm
 
 import logging
 logger = logging.getLogger(__file__)
@@ -48,6 +48,22 @@ def create_message(username, data):
     #msgobj = sender.message.create(**msg)
     #logger.info('Message created: %s', msgobj)
 
+def create_apiuser(username):
+    return apiuser.objects.get_or_create(user__username=username)
+
+def get_apiuser(username):
+    return apiuser.objects.get(user__username=username)
+
+def update_channel_name(username, channel_name):
+    #apiuser.objects.filter(user__username=username).update(channel_name=channel_name)
+    auser = create_apiuser(username)[0]
+    auser.channel_name = channel_name
+    auser.save()
+    return auser
+
+def get_message_not_seen(last_checked):
+    return Message.must_seen(last_checked)
+
 
 # channels 3.0 ref: https://github.com/andrewgodwin/channels-examples
 class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
@@ -55,17 +71,25 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         if self.scope["user"].is_anonymous:
             await self.close() # Reject the connection
         #else:
+
+        user = self.scope["user"]
         await self.channel_layer.group_add("users", self.channel_name)
+
+        #await sync_to_async(create_apiuser)(user.username)
+        auser = await sync_to_async(update_channel_name)(user.username, self.channel_name)
+        #logger.info("channel_name is %s", auser.channel_name) #specific channel for single user
+
         await self.accept() # Accept the connection
 
         await self.channel_layer.group_send(
             "users",
             {
                 "type": "msg.online", #--> handler: msg_online
-                'username': self.scope["user"].username, #essage.user.username
+                'username': user.username, #essage.user.username
                 'is_logged_in': True
             }
         )
+        await self.send_last_checked(auser) #send to specific use not_seen message
 
     async def receive_json(self, data):
         logger.info('Receive_json user=%s, message=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['due'], data['tzone'])
@@ -98,6 +122,19 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
 
         except ClientError:
             pass
+
+    async def send_last_checked(self, auser):
+        #auser= await sync_to_async(get_apiuser)(user.username)[0]
+        msgx = await sync_to_async(get_message_not_seen)(auser.last_checked)
+
+        for msg in msgx:
+            logger.info('Must seen in json: %s', msg.get('message'))
+            await self.channel_layer.send(auser.channel_name,
+                {
+                    'type': 'msg.send',
+                    'message': msg.get('message')
+                }
+            )
 
     async def msg_online(self, event):
         await self.send_json({
