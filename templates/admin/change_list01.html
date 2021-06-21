@@ -10,6 +10,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datetimepicker/4.17.37/js/bootstrap-datetimepicker.min.js"></script>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <link rel="stylesheet" type= "text/css" href="{% static 'css/notify.css' %}" />
 {% endblock %}
 
 {% block content %}
@@ -26,16 +27,41 @@
   <script src="{% static 'message.js' %}" defer></script>
 {{ media }}
 <div>
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <!-- Single button -->
+      <div class="btn-group pull-right top-head-dropdown">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Notification <span class="caret"></span>
+        </button>
+        <ul id="adminmsgbox" class="dropdown-menu dropdown-menu-right">
+          {% for message in messages %}
+          <li>
+            <!--p>{{ message.formatted_timestamp }}</p-->
+            <a href="#" class="top-text-block">
+              <span class="top-text-light msg-item">{{ message.message }}</span>
+            </a>
+          </li>
+          {% endfor %}
+          <!--li>
+            <div class="loader-topbar"></div>
+          </li-->
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <form id="adminmsgform">
-    <table id="adminmsgbox">
-      <tbody>
-        {% for message in messages %}
+    <!--table id="adminmsgbox"-->
+      <!--tbody>
+        {# % for message in messages % #}
           <tr>
             <!--td>{{ message.formatted_timestamp }}</td-->
             <td>{{ message.message }}</td>
           </tr>
-        {% endfor %}
-      </tbody>
+        {# % endfor % #}
+      </tbody-->
+    <table>
       <tfoot>
       <tr>
         <td>Broadcast</td>

@@ -29,14 +29,21 @@ $(function() {
       });
 
       if (data['message']) {
-        console.log(data['message']);
-        let msg = $("#msgbox");
-        let adminmsg = $("#adminmsgbox");
-        let ele = $("<tr></tr>");
-
-        ele.append($("<td></td>").text(data['message'])); //channels 1.1.8: use data['message'].message
-        msg.append(ele);
-        adminmsg.append(ele);
+        let res = $.grep($("span.msg-item"), function(el, index) {
+          return el.textContent === data['message']
+        });
+        //console.log(data['message'], "in: ", res);
+        if (res.length==0) { //avoid the same message item duplicated on msg box
+          let msg = $("#msgbox");
+          let adminmsg = $("#adminmsgbox");
+          // a good notification css: https://codepen.io/badhe/pen/OREomL
+          let ele0 = $("<li></li>");
+          let ele = $("<a href='#' class='top-text-block'></a>"); //$("<tr></tr>");
+          ele.wrapInner($("<span class='top-text-light msg-item'></span>").text(data['message'])) //.append($("<td></td>").text //channels 1.1.8: use data['message'].message
+          ele0.append(ele);
+          msg.append(ele0);
+          adminmsg.append(ele0);
+        }
       }
 
       if (data['is_logged_in']) {

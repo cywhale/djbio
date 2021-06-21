@@ -2,6 +2,31 @@
 {% block content %}
   {# % load staticfiles % #}
   {% load static %}
+
+  <div class="panel panel-default">
+    <div class="panel-body">
+      <!-- Single button -->
+      <div class="btn-group pull-right top-head-dropdown">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          Notification <span class="caret"></span>
+        </button>
+        <ul id="msgbox" class="dropdown-menu dropdown-menu-right">
+          {% for message in messages %}
+          <li>
+            <!--p>{{ message.formatted_timestamp }}</p-->
+            <a href="#" class="top-text-block">
+              <span class="top-text-light msg-item">{{ message.message }}</span>
+            </a>
+          </li>
+          {% endfor %}
+          <!--li>
+            <div class="loader-topbar"></div>
+          </li-->
+        </ul>
+      </div>
+    </div>
+  </div>
+
   <a href="{% url 'api:log_out' %}">Log out</a>
   <br>
   <div>
@@ -17,16 +42,18 @@
       {# endfor #}
     </ul>
   </div>
+
   <form id="msgform">
-    <table id="msgbox">
-      <tbody>
-        {% for message in messages %}
+    <!--table id="msgbox"-->
+      <!--tbody>
+        {# % for message in messages % #}
           <tr>
             <!--td>{{ message.formatted_timestamp }}</td-->
             <td>{{ message.message }}</td>
           </tr> 
-        {% endfor %}
-      </tbody>
+        {# % endfor % #}
+      </tbody-->
+    <table>
       <tfoot>
       <tr>
         <td>Say something:</td>
