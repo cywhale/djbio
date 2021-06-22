@@ -3,22 +3,22 @@
   {# % load staticfiles % #}
   {% load static %}
 
-  <div class="panel panel-default">
+  <div class="panel panel-default" style="border:none;">
     <div class="panel-body">
       <!-- Single button -->
       <div class="btn-group pull-right top-head-dropdown">
-        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-          Notification <span class="caret"></span>
+        <button type="button" class="msg_list btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          <i class="fas fa-envelope fa-2x"></i><span id="msg_cnt" class="counter counter-lg"></span>&nbsp;&nbsp;<span class="caret"></span>
         </button>
         <ul id="msgbox" class="dropdown-menu dropdown-menu-right">
-          {% for message in messages %}
-          <li>
-            <!--p>{{ message.formatted_timestamp }}</p-->
-            <a href="#" class="top-text-block">
+          {# % for message in messages % #}
+          <!--li id="msg_li_"+{{ message.id }} role="msg_li">
+            <p>{{ message.formatted_timestamp }}</p>
+            <a href="#" class="top-text-block">             
               <span class="top-text-light msg-item">{{ message.message }}</span>
-            </a>
-          </li>
-          {% endfor %}
+            </a><button type="button" class="close" data-dismiss="msg_li" data-target="#msg_li_"+{{ message.id }} aria-label="Remove">&times;</button>
+          </li-->
+          {# % endfor % #}
           <!--li>
             <div class="loader-topbar"></div>
           </li-->
@@ -72,5 +72,9 @@
   <script src="https://code.jquery.com/jquery-3.6.0.slim.min.js" integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI=" crossorigin="anonymous"></script>
   <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/reconnecting-websocket/1.0.0/reconnecting-websocket.min.js" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+  <!--link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.11.0/css/all.css"/-->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+  <link rel="stylesheet" type= "text/css" href="{% static 'css/notify.css' %}" />
   <script type="text/javascript" src="{% static 'message.js' %}"></script>
 {% endblock script %}

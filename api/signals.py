@@ -31,6 +31,6 @@ def on_user_login(sender, **kwargs): #,user,
 def on_user_logout(sender, user, **kwargs):
     auser=apiuser.objects.filter(
         Q(user__username=user.username) #kwargs.get('user')) #<--it's ok, if 'user' not in argument
-        ).update(last_checked=timezone.now(), channel_name="") #.delete() #dont remove otherwise no last_checked
+        ).update(last_checked=timezone.localtime(timezone.now()), channel_name="") #.delete() #dont remove otherwise no last_checked
     # Note an exception occur if use only 'timezone.now': expected string or bytes-like object ....dateparse.py in parse_datetime
     # logger.info('User logout and update last_check: %s', auser)

@@ -6,6 +6,7 @@ from django.contrib.auth.models import Group, User
 #from django.db.models import JSONField
 # Django 2.2.23
 # from django.contrib.postgres.fields import JSONField
+# from django.contrib.postgres.fields import ArrayField
 from django.db.models import JSONField #Django 3.2.3
 from django.conf import settings
 from django.utils import timezone
@@ -48,6 +49,7 @@ class apiuser(models.Model):
 #   group = models.ForeignKey(Group, on_delete=models.CASCADE)
     channel_name = models.CharField(max_length=100, default="") #for build single channel (to single user)
     last_checked = models.DateTimeField(db_index=False, null=True, blank=True) #auto_now=True cannot be updated
+    #msg_notseen = ArrayField(models.IntegerField(), null=True, blank=True) #that list removed if user checked close in html
 
     @property
     def formatted_lastchecked(self):
@@ -84,11 +86,12 @@ class Message(models.Model):
     @staticmethod
     def must_seen(last_checked=timezone.now):
         #q_check = Q(timestamp__gt=last_checked) # timestamp greater than user last_checked
-        chktime = last_checked if last_checked is not None else datetime.strptime('1970-01-01 00:00', "%Y-%m-%d %H:%M")
-        logger.info('Got a dtime criteria: %s', chktime)
+        nowt = timezone.localtime(timezone.now())
+        chktime = timezone.localtime(last_checked) if last_checked is not None else nowt.replace(hour=0,minute=0,second=0,microsecond=0) #datetime.strptime('1970-01-01 00:00', "%Y-%m-%d %H:%M")
+        #logger.info('Got a dtime criteria: %s %s %s', chktime, nowt, timezone.now()) ##Note: timezone.now is a UTC time!!
         qry = Message.objects.filter(
             Q(handle__username='djbioer') &
-            (Q(timestamp__gt=chktime) | (Q(due__isnull=False) & Q(due__gt=timezone.now()) & Q(level__gt=1))) #__date__gt
+            (Q(timestamp__gt=chktime) | (Q(due__isnull=False) & Q(due__gt=nowt) & Q(level__gt=1))) #__date__gt
             ).order_by('timestamp').order_by('-level')
         logger.info('Must Seen: %s', qry)
         qjson = {} if not qry.exists() else msg_as_dict(qry)

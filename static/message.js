@@ -28,6 +28,8 @@ $(function() {
         return $(this).data('username') == username;
       });
 
+      let cnt = parseInt($('#msg_cnt').text()) //'{{msg_count}}'===''? 0 : parseInt('{{msg_count}}');
+      cnt = cnt===null || isNaN(cnt)? 0 :  cnt;
       if (data['message']) {
         let res = $.grep($("span.msg-item"), function(el, index) {
           return el.textContent === data['message']
@@ -37,12 +39,19 @@ $(function() {
           let msg = $("#msgbox");
           let adminmsg = $("#adminmsgbox");
           // a good notification css: https://codepen.io/badhe/pen/OREomL
-          let ele0 = $("<li></li>");
+          let ele0 = $("<li role='msg_li'></li>"); //.append("<button type='button' class='close' data-dismiss='msg_li' aria-label='Remove'>&times;</button>");
           let ele = $("<a href='#' class='top-text-block'></a>"); //$("<tr></tr>");
-          ele.wrapInner($("<span class='top-text-light msg-item'></span>").text(data['message'])) //.append($("<td></td>").text //channels 1.1.8: use data['message'].message
+          if (data['message'].includes('IMPORTANT')) {
+            ele.wrapInner($("<span class='top-text-light alert-danger msg-item'></span>").text(data['message'])) //.append($("<td></td>").text //channels 1.1.8: use data['message'].message
+          } else {
+            ele.wrapInner($("<span class='top-text-light alert-light msg-item'></span>").text(data['message'])) //.append($("<td></td>").text //channels 1.1.8: use data['message'].message
+          }
           ele0.append(ele);
           msg.append(ele0);
           adminmsg.append(ele0);
+          cnt += 1;
+          $('#msg_cnt').text(cnt.toString());
+          $('#msg_cnt').css('color', 'red');
         }
       }
 
@@ -53,6 +62,13 @@ $(function() {
         user.html(username + ': Offline');
       }
     };
+
+
+//    $('#msgbox').on('click', 'li a', function(e) {
+    $(document).on("click", ".msg_list", function(event) {
+      $('#msg_cnt').css('color', 'grey');
+    });
+
 /* 20210616 modified: if only allow admin send message, comment it and user.html <!--tfoot> */
     $("#msgform").on("submit", function(event) {
         let msg = {

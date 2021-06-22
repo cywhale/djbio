@@ -1,3 +1,10 @@
+.counter.counter-lg {
+  top: -15px !important;
+  position: relative;
+  color: gray;
+}
+
+/* ref: https://codepen.io/badhe/pen/OREomL */
 .top-text-block{
   display: block;
   padding: 3px 20px;
@@ -35,23 +42,33 @@
   }
 }   
 
-.top-head-dropdown {
-  .dropdown-menu {
-   width: 350px;
-    height:300px;
-    overflow:auto;
-  }
-  li:last-child{
+.top-head-dropdown > .dropdown-menu {
+   width: 500px;
+   height:auto;
+   overflow:auto;
+}
+.top-head-dropdown > li:last-child{
     .top-text-block {
       border-bottom:0;
     }
-  }
 }
 
 .topbar-align-center {
   text-align: center;
 }
 
+@media screen and (max-width: 680px) {
+  .msg_list.btn.btn-default.dropdown-toggle { float: right !important; }
+  .top-head-dropdown {
+    width: 80%
+  }
+  .top-head-dropdown > .dropdown-menu { 
+    width: 100%;
+  }
+}
+
+
+/*
 .loader-topbar {
   margin: 5px auto;
   border: 3px solid #ddd;
@@ -72,3 +89,4 @@
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+*/

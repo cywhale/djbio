@@ -128,7 +128,7 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         msgx = await sync_to_async(get_message_not_seen)(auser.last_checked)
 
         for msg in msgx:
-            logger.info('Must seen in json: %s', msg.get('message'))
+            #logger.info('Must seen in json: %s', msg.get('message'))
             await self.channel_layer.send(auser.channel_name,
                 {
                     'type': 'msg.send',
