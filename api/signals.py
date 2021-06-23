@@ -12,9 +12,9 @@ from channels.layers import get_channel_layer
 #logger = logging.getLogger(__file__)
 
 
-@receiver(user_logged_in)
-def on_user_login(sender, **kwargs): #,user,
-    auser=apiuser.objects.get_or_create(user=kwargs.get('user')) #<--it's ok, if 'user' not in argument
+#@receiver(user_logged_in)
+#def on_user_login(sender, **kwargs): #,user,
+#    auser=apiuser.objects.get_or_create(user=kwargs.get('user')) #<--it's ok, if 'user' not in argument
 #    #logger.info('User logined signal: %s', auser[0])
 #    msgx= Message.must_seen(auser[0].last_checked)
 #    logger.info('Must seen in json: %s', msgx)

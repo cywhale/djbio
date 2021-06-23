@@ -30,9 +30,12 @@ def is_valid_datetime(dtime, tzone): #=settings.TIME_ZONE):
         logger.info("Get a Wrong date format: %s in timezone %s", dtime, tzone)
         return False
 
+def get_auth_user(username):
+    return User.objects.get(username=username)
+
 def create_message(username, data):
     dueon = data["due"] if is_valid_datetime(data["due"], data["tzone"]) else None
-    sender = User.objects.get(username=username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
+    sender = get_auth_user(username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
     logger.info("Now get msg handler: %s, msg: %s, due_on: %s", sender, data['message'], dueon)
     msgobj = Message(handle=sender, message=data['message'], due=dueon)
     msgobj.save()
@@ -48,15 +51,12 @@ def create_message(username, data):
     #msgobj = sender.message.create(**msg)
     #logger.info('Message created: %s', msgobj)
 
-def create_apiuser(username):
-    return apiuser.objects.get_or_create(user__username=username)
+def create_apiuser(user):
+    return apiuser.objects.get_or_create(user=user) #user__username=username
 
-def get_apiuser(username):
-    return apiuser.objects.get(user__username=username)
-
-def update_channel_name(username, channel_name):
+def update_channel_name(user, channel_name):
     #apiuser.objects.filter(user__username=username).update(channel_name=channel_name)
-    auser = create_apiuser(username)[0]
+    auser = create_apiuser(user)[0]
     auser.channel_name = channel_name
     auser.save()
     return auser
@@ -75,8 +75,9 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         user = self.scope["user"]
         await self.channel_layer.group_add("users", self.channel_name)
 
-        #await sync_to_async(create_apiuser)(user.username)
-        auser = await sync_to_async(update_channel_name)(user.username, self.channel_name)
+        uobj = await sync_to_async(get_auth_user)(user.username)
+        logger.info("auth_name is %s", uobj.username)
+        auser= await sync_to_async(update_channel_name)(uobj, self.channel_name)
         #logger.info("channel_name is %s", auser.channel_name) #specific channel for single user
 
         await self.accept() # Accept the connection
