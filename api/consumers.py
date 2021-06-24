@@ -36,9 +36,10 @@ def get_auth_user(username):
 def create_message(username, data):
     dueon = data["due"] if is_valid_datetime(data["due"], data["tzone"]) else None
     sender = get_auth_user(username) #(if use apiuser) user__username: fix the exception Field 'id' expected a number but got...
-    logger.info("Now get msg handler: %s, msg: %s, due_on: %s", sender, data['message'], dueon)
-    msgobj = Message(handle=sender, message=data['message'], due=dueon)
+    #logger.info("Now get msg handler: %s, msg: %s, due_on: %s", sender, data['message'], dueon)
+    msgobj = Message(handle=sender, message=data['message'], due=dueon, level=int(data['level']))
     msgobj.save()
+    return msgobj.formatted_message # send a formatted message the same as when query msg_not_seen
     #msg = json.loads(json.dumps({ #MsgForm({ #Message.objects.create(
         #    #id=None,
         #    'handle':sender,
@@ -93,18 +94,19 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         await self.send_last_checked(auser) #send to specific use not_seen message
 
     async def receive_json(self, data):
-        logger.info('Receive_json user=%s, message=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['due'], data['tzone'])
+        logger.info('Receive_json user=%s, message=%s, level=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['level'], data['due'], data['tzone'])
         try:
+            msgsave = await sync_to_async(create_message)(self.scope["user"].username, data) #msgsave is MsgLevel + data['message'] + due
+            #logger.info("Formatting Group send: %s", msgsave) #send a formatted message the same as when query msg_not_seen
             await self.channel_layer.group_send(
                 "users",
                 {
                     "type": "msg.send", #--> handler: msg_send
-                    "message": data["message"],
-                    "due": data["due"],
-                    "tzone": data["tzone"],
+                    "message": msgsave, #data["message"],
+                    #"due": data["due"],
+                    #"tzone": data["tzone"],
                 }
             )
-            await sync_to_async(create_message)(self.scope["user"].username, data)
 
         except ClientError as err:
             await self.send_json({"error": err.code}) # Catch any errors and send it back

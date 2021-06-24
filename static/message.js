@@ -92,6 +92,7 @@ $(function() {
 
         let msg = {
             message: $('#adminmessage').val(),
+            level: $('#adminmsglevel').val(),
             due: localTime,
             tzone: tzone
         }

@@ -23,6 +23,29 @@
         format: "YYYY-MM-DD HH:mm",
         defaultDate:'' //in django, needs YYYY-MM-DD HH:MM[:ss[.uuuuuu]][TZ] format.
       });
+
+      /* correctly show calendar positon ref: http://jsfiddle.net/cmpgtuwy/654/ */
+      $('#due_datetime').on('dp.show', function() {
+	let datepicker = $('body').find('.bootstrap-datetimepicker-widget:last');
+
+	if (datepicker.hasClass('bottom')) {
+            let top = $(this).offset().top + $(this).outerHeight();
+	    let left = $(this).offset().left;
+	    datepicker.css({
+	      'top': top + 'px',
+	      'bottom': 'auto',
+	      'left': left + 'px'
+	    });
+	} else if (datepicker.hasClass('top')) {
+	    let top = $(this).offset().top - datepicker.outerHeight();
+	    let left = $(this).offset().left;
+	    datepicker.css({
+              'top': top + 'px',
+	      'bottom': 'auto',
+              'left': left + 'px'
+	    });
+        }
+     });
     });
   </script>
   <script src="{% static 'message.js' %}" defer></script>
@@ -62,21 +85,32 @@
           </tr>
         {# % endfor % #}
       </tbody-->
-    <table>
-      <tfoot>
-      <tr>
-        <td>Broadcast</td>
-        <td colspan=2>
+    <table class="table table-responsive noborder" style="border-collapse:collapse">
+      <tbody>
+      <thead class="noboder">Broadcast</thead>
+      <tr class="noborder">
+        <td id="adminmsgtd" class="noborder" style="max-width:40%;">
           <textarea id="adminmessage" rows="3" placeholder="Say something here..."></textarea>
         </td>
-        <td colspan=3>
+        <td class="noborder" style="width:25%;min-width:135px;">
           <label for="due_datetime">due on:</label>
           <input class="form-control" id="due_datetime" type="text" />
         </td>
-        <td>
+        <td class="noborder" style="width:20%;">
+          <label for="adminmsglevel">Level: </label>
+          <select id="adminmsglevel">
+            <option value=1 selected="selected">Normal</option>
+            <option value=2>Urgent</option>
+            <option value=3>Ontop</option>
+          </select>
+        </td>
+      </tr>
+      <tr class="noborder">
+        <td class="noborder">
           <button type="submit" id="adminmsgsend">Say it</button>
         </td>
-      </tfoot>
+      </tr>
+      </tbody>
     </table>
   </form>
 </div>

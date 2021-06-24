@@ -18,6 +18,18 @@ import json
 import logging
 logger = logging.getLogger(__file__)
 
+
+def formmated_msg(message, dueon, level):
+    notion="" if level==1 else "IMPORTANT! "
+    #due_on="" if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
+    if dueon is not None:
+      if isinstance(dueon, datetime):
+         due_on = " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
+      else:
+         due_on = " Note: Due on "+ datetime.strptime(dueon, "%Y-%m-%dT%H:%M:%S.%f").strftime('%Y-%m-%d %H:%M')
+
+    return notion+message+due_on
+
 def msg_as_dict(qrylist):
     out = []
     for qry in qrylist:
@@ -26,9 +38,9 @@ def msg_as_dict(qrylist):
         level = getattr(qry, "level")
         dueon = getattr(qry, "due")
         msg = getattr(qry, "message")
-        notion="" if level==1 else "IMPORTANT! "
-        due_on="" if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
-        out.append({'message': notion+msg+due_on})
+        #notion="" if level==1 else "IMPORTANT! "
+        #due_on="" if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
+        out.append({'message': formmated_msg(msg, dueon, level)})
 
     return out
 
@@ -105,6 +117,10 @@ class Message(models.Model):
     def formatted_timestamp(self):
         return timezone.localtime(self.timestamp).strftime('%Y-%m-%d %H:%M')
 
+    @property
+    def formatted_message(self):
+        return formmated_msg(self.message, self.due, self.level)
+
     def as_dict(self):
         return {'message': self.message,
             'level': '' if self.level==1 else '['+self.get_level_display()+']', # display self.level name
@@ -116,8 +132,8 @@ class Message(models.Model):
         #if self.pk is None:  # if this is new object (not update)
             #self.msgid += 1
             #self.msguid = str(uuid.uuid4())
-    #   instance = super(Message, self).save(*args, **kwargs)
-    #   return instance
+        #super(Message, self).save(*args, **kwargs)
+        #return self.formatted_message
 
 #class MsgForm(ModelForm):
 #    class Meta:

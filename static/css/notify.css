@@ -57,7 +57,13 @@
   text-align: center;
 }
 
-@media screen and (max-width: 680px) {
+.noborder {
+  border:none !important;
+}
+
+#adminmessage { width: 100%; }
+
+@media screen and (max-width: 767px) {
   .msg_list.btn.btn-default.dropdown-toggle { float: right !important; }
   .top-head-dropdown {
     width: 80%
@@ -65,6 +71,15 @@
   .top-head-dropdown > .dropdown-menu { 
     width: 100%;
   }
+  .noborder {
+    border:none !important;
+    margin:0 0 0 1px;
+    padding:0px;
+  }
+
+  #adminmsglevel { font-size:0.75em}
+  #adminmsgtd { width: 25%; }
+  #adminmessage { width: 110px; }
 }
 
 
