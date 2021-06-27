@@ -4,6 +4,7 @@
 #from django.contrib.auth.models import User
 #import json
 from datetime import datetime #, timezone
+from django.utils import timezone
 
 # channels 3.0
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
@@ -29,6 +30,14 @@ def is_valid_datetime(dtime, tzone): #=settings.TIME_ZONE):
     except ValueError:
         logger.info("Get a Wrong date format: %s in timezone %s", dtime, tzone)
         return False
+
+def has_json_key(json, key):
+    try:
+        return json[key]
+
+    except KeyError:
+        return False
+
 
 def get_auth_user(username):
     return User.objects.get(username=username)
@@ -65,6 +74,10 @@ def update_channel_name(user, channel_name):
 def get_message_not_seen(last_checked):
     return Message.must_seen(last_checked)
 
+def update_lastchk_time(username): #do it before reconnect(here) and logout (signals.py)
+    #return apiuser.objects.filter(user__username=username).update(last_checked=timezone.localtime(timezone.now()), channel_name="") #used when disconnect
+    return apiuser.objects.filter(user__username=username).update(last_checked=timezone.localtime(timezone.now())) #used in receive socket from client, not a re-connect signal
+
 
 # channels 3.0 ref: https://github.com/andrewgodwin/channels-examples
 class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
@@ -94,22 +107,27 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
         await self.send_last_checked(auser) #send to specific use not_seen message
 
     async def receive_json(self, data):
-        logger.info('Receive_json user=%s, message=%s, level=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['level'], data['due'], data['tzone'])
-        try:
-            msgsave = await sync_to_async(create_message)(self.scope["user"].username, data) #msgsave is MsgLevel + data['message'] + due
-            #logger.info("Formatting Group send: %s", msgsave) #send a formatted message the same as when query msg_not_seen
-            await self.channel_layer.group_send(
-                "users",
-                {
-                    "type": "msg.send", #--> handler: msg_send
-                    "message": msgsave, #data["message"],
-                    #"due": data["due"],
-                    #"tzone": data["tzone"],
-                }
-            )
+        #logger.info("First received message: %s", data)
+        if has_json_key(data, "lastchecked"):
+            await sync_to_async(update_lastchk_time)(self.scope["user"].username)
 
-        except ClientError as err:
-            await self.send_json({"error": err.code}) # Catch any errors and send it back
+        else:
+            logger.info('Receive_json user=%s, message=%s, level=%s, dtime=%s timezone=%s', self.scope["user"].username, data['message'], data['level'], data['due'], data['tzone'])
+            try:
+                msgsave = await sync_to_async(create_message)(self.scope["user"].username, data) #msgsave is MsgLevel + data['message'] + due
+                #logger.info("Formatting Group send: %s", msgsave) #send a formatted message the same as when query msg_not_seen
+                await self.channel_layer.group_send(
+                    "users",
+                    {
+                        "type": "msg.send", #--> handler: msg_send
+                        "message": msgsave, #data["message"],
+                        #"due": data["due"],
+                        #"tzone": data["tzone"],
+                    }
+                )
+
+            except ClientError as err:
+                await self.send_json({"error": err.code}) # Catch any errors and send it back
 
     async def disconnect(self, close_code):
         try:
@@ -121,6 +139,7 @@ class MsgConsumer(AsyncJsonWebsocketConsumer): #WebsocketConsumer):
                     'is_logged_in': False
                 }
             )
+            #await sync_to_async(update_lastchk_time)(self.scope["user"].username) #<- it works when reconnect to signal last_checked, but may cause unread message if unintended re-connection
             await self.channel_layer.group_discard("users", self.channel_name)
 
         except ClientError:

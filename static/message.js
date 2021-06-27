@@ -30,6 +30,11 @@ $(function() {
 
       let cnt = parseInt($('#msg_cnt').text()) //'{{msg_count}}'===''? 0 : parseInt('{{msg_count}}');
       cnt = cnt===null || isNaN(cnt)? 0 :  cnt;
+      if (data['lastchecked']) {
+        console.log("receive data lastchecked", data['lastchecked']);
+        return
+      }
+
       if (data['message']) {
         let res = $.grep($("span.msg-item"), function(el, index) {
           return el.textContent === data['message']
@@ -64,9 +69,10 @@ $(function() {
     };
 
 
-//    $('#msgbox').on('click', 'li a', function(e) {
+//  $('#msgbox').on('click', 'li a', function(e) {
     $(document).on("click", ".msg_list", function(event) {
       $('#msg_cnt').css('color', 'grey');
+      socket.send(JSON.stringify({lastchecked: true}));
     });
 
 /* 20210616 modified: if only allow admin send message, comment it and user.html <!--tfoot> */

@@ -21,7 +21,7 @@ logger = logging.getLogger(__file__)
 
 def formmated_msg(message, dueon, level):
     notion="" if level==1 else "IMPORTANT! "
-    #due_on="" if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
+    due_on="" #if dueon==None else " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
     if dueon is not None:
       if isinstance(dueon, datetime):
          due_on = " Note: Due on "+ timezone.localtime(dueon).strftime('%Y-%m-%d %H:%M') #'%b %-d %-I:%M %p')
