@@ -30,7 +30,7 @@ $(function() {
 
       let cnt = parseInt($('#msg_cnt').text()) //'{{msg_count}}'===''? 0 : parseInt('{{msg_count}}');
       cnt = cnt===null || isNaN(cnt)? 0 :  cnt;
-      if (data['lastchecked']) {
+      if (data['lastchecked']) { //<- it works but seems no use if cannot correctly socket.send (in .msg_list.click)
         console.log("receive data lastchecked", data['lastchecked']);
         return
       }
@@ -72,7 +72,7 @@ $(function() {
 //  $('#msgbox').on('click', 'li a', function(e) {
     $(document).on("click", ".msg_list", function(event) {
       $('#msg_cnt').css('color', 'grey');
-      socket.send(JSON.stringify({lastchecked: true}));
+      socket.send(JSON.stringify({lastchecked: true})); //<- it works, but unknown reason that cause reconnect (only happened when has daphne and caused Access denied) then disconnect
     });
 
 /* 20210616 modified: if only allow admin send message, comment it and user.html <!--tfoot> */

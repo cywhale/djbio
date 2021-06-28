@@ -16,12 +16,14 @@ Including another URLconf
 from django.contrib import admin #admin.site, tmp try to customize it
 #from api.admin import admin_site
 from django.urls import include, path, re_path
+from api.djapi import djapi
 #import api.views
 
 urlpatterns = [
     #path('admin/', admin_site.urls), #admin.site, tmp try to customize it
     path('admin/', admin.site.urls),
-    re_path(r'^', include(('api.urls', 'api'), namespace='api')), #api.views.index
+    path('api/', djapi.urls),
+    re_path(r'^', include(('api.urls', 'apitest'), namespace='apitest')), #change api-> apitest, api go for django-ninja  #api.views.index
 ]
 
 #admin.site.index_template = 'admin/admin_tmptry.html'

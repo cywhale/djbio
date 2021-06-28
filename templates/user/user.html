@@ -27,7 +27,7 @@
     </div>
   </div>
 
-  <a href="{% url 'api:log_out' %}">Log out</a>
+  <a href="{% url 'apitest:log_out' %}">Log out</a>
   <br>
   <div>
     <ul>
@@ -37,7 +37,7 @@
           {{ user.username|escape }}: {{ user.status|default:'Offline' }}
         </li>
         <li>
-          <a href="{% url 'api:dboard' %}">See API..</a>
+          <a href="{% url 'api-1.0.0:api-root' %}">See API..</a>
         </li>
       {# endfor #}
     </ul>

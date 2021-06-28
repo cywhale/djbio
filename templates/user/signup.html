@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block content %}
-  <form action="{% url 'api:sign_up' %}" method="post">
+  <form action="{% url 'apitest:sign_up' %}" method="post">
     {% csrf_token %}
     {% if form.errors %}
       <!-- Error messaging -->
@@ -24,6 +24,6 @@
       </div>
     {% endfor %}
     <button type="submit">Sign up</button>
-    <p>Already have an account? <a href="{% url 'api:log_in' %}">Log in!</a></p>
+    <p>Already have an account? <a href="{% url 'apitest:log_in' %}">Log in!</a></p>
   </form>
 {% endblock content %}

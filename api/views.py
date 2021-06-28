@@ -13,11 +13,9 @@ logger = logging.getLogger(__file__)
 
 # Create your views here.
 
-def dboard(request):
-    records = apitest.objects.count()
-    #username = request.GET.get("name") #or "guest" #request.GET["name"] #request.GET.getlist("name")
-    #return HttpResponse("Hello, {}!".format(name)) #"{vname1} {vname2}".format(vname1=var1,vname2=var2)
-    return render(request, "api/dboard.html", {"records": records})
+#def dboard(request): ## move to djapi.py
+#    records = apitest.objects.count()
+#    return render(request, "api/dboard.html", {"records": records})
 
 # User Handler
 User = get_user_model()
@@ -41,8 +39,8 @@ def log_in(request):
             if user is not None:
                 #if user.is_active:
                 login(request, user)
-                #return HttpResponseRedirect(reverse('api:dboard', username)) #find name is 'dboard' under api app
-                return redirect(reverse('api:user_handler'))
+                #return HttpResponseRedirect(reverse('apitest:dboard', username)) #find name is 'dboard' under api app
+                return redirect(reverse('apitest:user_handler'))
             else:
                 logger.info("No User found!!") #If error occurs and usage of logger seems not work (in form.is_valid, loggers works well)
                 #messages.info(request,'username or password not correct') #Django give its own error message in base.html messages template
@@ -66,6 +64,6 @@ def sign_up(request):
             return redirect('/login')
         else:
             messages.error(request, form.errors) #Seems no effect??
-            #return redirect(reverse('api:sign_up')) #stay here
+            #return redirect(reverse('apitest:sign_up')) #stay here
 
     return render(request, 'user/signup.html', {'form': form})

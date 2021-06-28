@@ -2,7 +2,7 @@
 from django.db import models
 #from django.forms import ModelForm
 #from django.contrib.gis.db import models
-from django.contrib.auth.models import Group, User
+from django.contrib.auth.models import User #, Group
 #from django.db.models import JSONField
 # Django 2.2.23
 # from django.contrib.postgres.fields import JSONField
@@ -51,6 +51,10 @@ class apitest (models.Model):
     name= models.CharField(max_length=30,db_index=True,unique=True) #,default=code_generate)
     uid = models.CharField(max_length=100) #ForeignKey(User,db_index=True, on_delete=models.CASCADE)
     gjson=JSONField()
+    owner=models.ForeignKey(User,
+        related_name='apitest', null=True,
+        on_delete=models.SET_NULL
+    )
     def __str__(self):
         return "%s_%s" % (self.uid, self.name)
 
