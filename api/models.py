@@ -7,7 +7,7 @@ from django.contrib.auth.models import User #, Group
 # Django 2.2.23
 # from django.contrib.postgres.fields import JSONField
 # from django.contrib.postgres.fields import ArrayField
-from django.db.models import JSONField #Django 3.2.3
+from django.db.models import TextField, JSONField #Django 3.2.3
 from django.conf import settings
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
@@ -50,13 +50,14 @@ class apitest (models.Model):
     """A trial of test API."""
     name= models.CharField(max_length=30,db_index=True,unique=True) #,default=code_generate)
     uid = models.CharField(max_length=100) #ForeignKey(User,db_index=True, on_delete=models.CASCADE)
-    gjson=JSONField()
+    gjson=JSONField(null=True, blank=True)
+    url = TextField(null=True, blank=True)
     owner=models.ForeignKey(User,
         related_name='apitest', null=True,
         on_delete=models.SET_NULL
     )
     def __str__(self):
-        return "%s_%s" % (self.uid, self.name)
+        return "%s (%s)" % (self.uid, self.name)
 
 class apiuser(models.Model):
     user = models.OneToOneField(
